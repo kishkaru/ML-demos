@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 
 
 # Q-Learning settings
-# (0, 1)
+# (0, 1): Determines extent newly acquired information overrides old information
 LEARNING_RATE = 0.1
-# (0, 1): Measure of how much we want to care about FUTURE reward rather than immediate reward
+# (0, 1): Importance of FUTURE reward, rather than immediate reward
 DISCOUNT = 0.95
 EPISODES = 4000  # Configurable
 SHOW_EVERY = 1000

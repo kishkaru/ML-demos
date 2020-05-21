@@ -14,7 +14,7 @@ def process_img(image):
     i = array(image.raw_data)
     i2 = i.reshape((IMG_HEIGHT, IMG_WIDTH, 4))
     i3 = i2[:, :, :3]
-    cv2.imwrite(f'output/{image.frame}.png', i3)
+    # cv2.imwrite(f'output/{image.frame}.png', i3)
     cv2.imshow("Camera Output", i3)
     cv2.waitKey(1)
     return i3/255.0
