@@ -83,14 +83,14 @@ def train_model(training_data_path):
                 # A feed forward model (go in forward order)
                 model = Sequential()
 
-                # layer 1: Convolutional
+                # layer 1: Convolutional (2D layer)
                 # (nodes, window size (3x3), shape of data)
                 model.add(Conv2D(64, (3, 3), input_shape=features.shape[1:]))
                 model.add(Activation('relu'))
                 # (2x2 pool size)
                 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-                # (Optional) Convolutional layer(s)
+                # (Optional) Convolutional layer(s) (2D layers)
                 for _ in range(conv_layer - 1):
                     model.add(Conv2D(64, (3, 3)))
                     model.add(Activation('relu'))
@@ -98,12 +98,12 @@ def train_model(training_data_path):
 
                 model.add(Flatten())  # convert 3D feature maps to 1D feature vectors
 
-                # (Optional) Dense layer(s)
+                # (Optional) Dense layer(s) (1D "fully connected" layer)
                 for _ in range(dense_layer):
                     model.add(Dense(64))
                     model.add(Activation('relu'))
 
-                # output layer
+                # output Dense layer (1D "fully connected" layer)
                 model.add(Dense(1))
                 model.add(Activation('sigmoid'))
 
