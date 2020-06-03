@@ -233,6 +233,7 @@ class DQNAgent:
 
     # Adds step's data to a memory replay array
     def update_replay_memory(self, transition):
+        # transition = (current_state, action, reward, new_state, done)
         self.replay_memory.append(transition)
 
     # Update the target model with the main model's weights
@@ -345,7 +346,7 @@ if not os.path.isdir('models'):
 agent = DQNAgent()
 
 # Iterate over episodes
-for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
+for episode in tqdm(range(1, EPISODES + 1), unit='episodes'):
     # Update tensorboard step every episode
     agent.tensorboard.step = episode
 
@@ -369,7 +370,7 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
         # Perform the action and receive (new state, reward, done)
         new_state, reward, done = env.step(action)
 
-        # Transform new continous state to new discrete state and count reward
+        # Transform new continuous state to new discrete state and count reward
         episode_reward += reward
 
         # Visualize every AGGREGATE_STATS_EVERY episode
