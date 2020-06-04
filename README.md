@@ -17,6 +17,12 @@ cuDNN 7.6.5 (libcudnn 7.6.5)  [CUDA Deep Neural Network]  (/usr/lib/x86_64-linux
 TensorRT 7.0.0 (libnvinfer, graphsurgeon-tf, python3-libnvinfer)  (/usr/lib/x86_64-linux-gnu)
 ```
 
+### TensorBoard Metrics
+```
+$ tensorboard --logdir=logs/
+TensorBoard 2.2.1 at http://localhost:6006/ (Press CTRL+C to quit)
+```
+
 ### CARLA
 Run CARLA server
 ```

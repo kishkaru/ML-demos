@@ -6,25 +6,21 @@ import os
 import math
 
 from numpy import array
-import cv2
 import carla
 
 from tqdm import tqdm  # progressbar decorator for iterators
 import numpy as np  # for array stuff and random
-from PIL import Image  # for creating visual of our env
 import cv2  # for showing our env live
 
 import tensorflow as tf
-from tensorflow.keras.models import Model
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
+from tensorflow.keras.layers import Dense, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, AveragePooling2D
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 from tensorflow.keras.optimizers import Adam
 from modified_tensorboard import ModifiedTensorBoard
 
-IMG_WIDTH = 1280
-IMG_HEIGHT = 720
+IMG_WIDTH = 640
+IMG_HEIGHT = 480
 SHOW_PREVIEW = False
 SECONDS_PER_EPISODE = 10
 
@@ -35,7 +31,7 @@ PREDICTION_BATCH_SIZE = 1  # How many steps (samples) to use for prediction
 TRAINING_BATCH_SIZE = MINIBATCH_SIZE // 4
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 ACTION_SPACE_SIZE = 3  # how many choices (3)
-MODEL_NAME = "Xception"
+MODEL_NAME = "64x3-CNN"
 
 MEMORY_FRACTION = 0.8  # Memory fraction, used mostly when training multiple agents
 MIN_REWARD = -200  # For model save (model didn't get to the food, but also didn't hit an enemy)
