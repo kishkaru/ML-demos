@@ -17,7 +17,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, AveragePooling2D
 from tensorflow.keras.optimizers import Adam
-from modified_tensorboard import ModifiedTensorBoard
+from tensrflow.modified_tensorboard import ModifiedTensorBoard
 
 IMG_WIDTH = 640
 IMG_HEIGHT = 480
