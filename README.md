@@ -8,6 +8,35 @@ root : ML demos written via pure Python
 - tensrflow : ML demos using Tensorflow 2.x
 ```
 
+### Prerequisites
+
+1.Install pyenv
+```
+curl https://pyenv.run | bash
+
+cat >~/.bash_profile <<<"
+export PATH="/home/kishan/.pyenv/bin:$PATH"
+eval \"\$(pyenv init -)\"
+eval \"\$(pyenv virtualenv-init -)\"
+"
+
+source ~/.bash_profile
+```
+2.Install Python 3.7
+```
+pyenv install 3.7.7
+```
+3.Create and activate pyenv virtualenv for ML demos
+```
+pyenv virtualenv 3.7.7 ml_venv
+pyenv activate ml_venv
+```
+4.Install required Python modules
+```
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
 ### GPU acceleration
 
 ```
