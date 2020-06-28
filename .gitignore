@@ -4,3 +4,4 @@ models
 cat_dog
 __pycache__
 pytrch/MNIST
+pytrch/training_data.npy

@@ -33,6 +33,7 @@ def create_and_store_training_data(data_save_dir_name):
                 img_array = cv2.imread(os.path.join(path, img), cv2.IMREAD_GRAYSCALE)
                 # Resize image to IMG_SIZExIMG_SIZE
                 img_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))
+                # Save data as [features, label] : [image, hot_hot vector]
                 training_data.append([img_array, class_num])
                 # plt.imshow(img_array, cmap='gray')  # graph it
                 # plt.show()  # display!
