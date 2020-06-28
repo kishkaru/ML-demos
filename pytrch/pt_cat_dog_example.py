@@ -18,6 +18,13 @@ TESTING = "Testing"
 CATEGORIES = ["Dog", "Cat"]
 REBUILD_DATA = False
 
+device = torch.device("cpu")
+if torch.cuda.is_available():
+    device = torch.device("cuda:0")
+    print("Running on the GPU")
+else:
+    print("Running on the CPU")
+
 
 class DogsVSCats:
     # 50x50 px image
@@ -135,13 +142,13 @@ test_labels = labels[train_size:]
 
 # 4) Train model
 print("Training model...")
-net = Net()
+net = Net().to(device)
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 # use mean squared error for one_hot vectors
 loss_function = nn.MSELoss()
 
 BATCH_SIZE = 100
-EPOCHS = 1
+EPOCHS = 10
 
 # Epochs: episodes/iterations over dataset
 for epoch in range(EPOCHS):
@@ -149,6 +156,10 @@ for epoch in range(EPOCHS):
     for i in tqdm(range(0, len(train_features), BATCH_SIZE)):
         batch_features = train_features[i:i+BATCH_SIZE].view(-1, 1, 50, 50)
         batch_labels = train_labels[i:i+BATCH_SIZE]
+
+        # Move the dataset into the GPU
+        batch_features = batch_features.to(device)
+        batch_labels = batch_labels.to(device)
 
         net.zero_grad()
 
@@ -167,15 +178,15 @@ for epoch in range(EPOCHS):
 print("Validating model against test dataset...")
 correct = 0
 total = 0
-with torch.no_grad():
-    for i in tqdm(range(len(test_features))):
-        real_class = torch.argmax(test_labels[i])
-        net_out = net(test_features[i].view(-1, 1, 50, 50))[0]  # returns a list,
-        predicted_class = torch.argmax(net_out)
-        # print(f'Actual: {CATEGORES[real_class]}, predicted: {CATEGORIES[predicted_class]}')
+for i in tqdm(range(0, len(test_features), BATCH_SIZE)):
+    batch_features = test_features[i:i+BATCH_SIZE].view(-1, 1, 50, 50).to(device)
+    batch_labels = test_labels[i:i+BATCH_SIZE].to(device)
+    batch_out = net(batch_features)
 
+    predicted_maxes = [torch.argmax(i) for i in batch_out]
+    actual_maxes = [torch.argmax(i) for i in batch_labels]
+    for predicted_class, real_class in zip(predicted_maxes, actual_maxes):
         if predicted_class == real_class:
             correct += 1
         total += 1
 print("Accuracy: ", round(correct/total, 3))
-
