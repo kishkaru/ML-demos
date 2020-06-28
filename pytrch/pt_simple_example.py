@@ -49,6 +49,7 @@ class Net(nn.Module):
         # Output layer: 10 nodes (1 per each output prediction [0,9])
         self.fc4 = nn.Linear(64, 10)
 
+    # Define a neural net order for training
     def forward(self, x):
         # rectified linear (relu) activation function (keep data scaled between 0 and 1)
         x = F.relu(self.fc1(x))

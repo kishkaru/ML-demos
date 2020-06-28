@@ -1,12 +1,9 @@
 import os
-import random
 import time
 
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
 from tqdm import tqdm
-import pickle
 
 import torch
 import torch.nn as nn
@@ -95,6 +92,7 @@ class Net(nn.Module):
             self._to_linear = np.prod(x[0].shape)
         return x
 
+    # Define a neural net order for training
     def forward(self, x):
         # Run through first 3 Convolutional 2D layers
         x = self.convs(x)
@@ -106,6 +104,64 @@ class Net(nn.Module):
         x = self.fc2(x)
         # softmax: outputs are a confidence score, adding up to 1.
         return F.softmax(x, dim=1)
+
+    # Common helper method for training/testing
+    def fwd_pass(self, features, labels, train=False):
+        # If training, set gradients to 0 before calc loss. Don't re-optimize for previous gradients that we already optimized for
+        if train:
+            net.zero_grad()
+
+        # Run data through neural net and return list of network predictions
+        outputs = net(features)
+
+        # Calculate accuracy
+        matches = [torch.argmax(i) == torch.argmax(j) for i, j in zip(outputs, labels)]
+        acc = matches.count(True) / len(matches)
+
+        # Calculate loss
+        loss = loss_function(outputs, labels)
+
+        if train:
+            # Apply the resulting loss backwards through the network's parameters
+            loss.backward()
+            # Attempt to optimize weights to account for loss/gradients
+            optimizer.step()
+
+        return acc, loss
+
+    def train(self, net, test_features, test_labels):
+        BATCH_SIZE = 100
+        EPOCHS = 5
+
+        # Epochs: episodes/iterations over dataset
+        with open("model.log", "a") as f:
+            for epoch in range(EPOCHS):
+                # From 0, to the len of train_features, stepping BATCH_SIZE at a time.
+                for i in tqdm(range(0, len(train_features), BATCH_SIZE)):
+                    batch_features = train_features[i:i + BATCH_SIZE].view(-1, 1, 50, 50)
+                    batch_labels = train_labels[i:i + BATCH_SIZE]
+
+                    # Move the dataset into the GPU
+                    batch_features = batch_features.to(device)
+                    batch_labels = batch_labels.to(device)
+
+                    # Train
+                    acc, loss = self.fwd_pass(batch_features, batch_labels, True)
+
+                    # Every 50 batches, perform validation test
+                    if i % 50 == 0:
+                        # Test
+                        val_acc, val_loss = self.test(test_features, test_labels, size=100)
+                        # Write the acc/loss data to CSV file
+                        f.write(f"{MODEL_NAME},{round(time.time(), 3)},{round(float(acc), 2)},{round(float(loss), 4)},{round(float(val_acc), 2)},{round(float(val_loss), 4)},{epoch}\n")
+
+                print(f"Epoch: {epoch}. Loss: {loss}")
+                print("In-sample acc:", round(acc, 2))
+
+    def test(self, test_features, test_labels, size=32):
+        features, labels = test_features[:size], test_labels[:size]
+        val_acc, val_loss = self.fwd_pass(features.view(-1, 1, 50, 50).to(device), labels.to(device))
+        return val_acc, val_loss
 
 
 # 1) Create and store the training data as numpy array (as needed)
@@ -140,53 +196,32 @@ train_labels = labels[:train_size]
 test_features = features[train_size:]
 test_labels = labels[train_size:]
 
-# 4) Train model
+# 4) Train model (and save acc/loss data to file)
 print("Training model...")
+MODEL_NAME = f"model-{int(time.time())}"
+
 net = Net().to(device)
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 # use mean squared error for one_hot vectors
 loss_function = nn.MSELoss()
-
-BATCH_SIZE = 100
-EPOCHS = 10
-
-# Epochs: episodes/iterations over dataset
-for epoch in range(EPOCHS):
-    # From 0, to the len of train_features, stepping BATCH_SIZE at a time.
-    for i in tqdm(range(0, len(train_features), BATCH_SIZE)):
-        batch_features = train_features[i:i+BATCH_SIZE].view(-1, 1, 50, 50)
-        batch_labels = train_labels[i:i+BATCH_SIZE]
-
-        # Move the dataset into the GPU
-        batch_features = batch_features.to(device)
-        batch_labels = batch_labels.to(device)
-
-        net.zero_grad()
-
-        # List of network predictions
-        outputs = net(batch_features)
-        # calc and grab the loss value
-        loss = loss_function(outputs, batch_labels)
-        # apply the resulting loss backwards through the network's parameters
-        loss.backward()
-        # attempt to optimize weights to account for loss/gradients
-        optimizer.step()
-
-    print(f"Epoch: {epoch}. Loss: {loss}")
+net.train(net, test_features, test_labels)
 
 # 5) Test neural net against validation dataset
 print("Validating model against test dataset...")
-correct = 0
-total = 0
-for i in tqdm(range(0, len(test_features), BATCH_SIZE)):
-    batch_features = test_features[i:i+BATCH_SIZE].view(-1, 1, 50, 50).to(device)
-    batch_labels = test_labels[i:i+BATCH_SIZE].to(device)
-    batch_out = net(batch_features)
+val_acc, val_loss = net.test(test_features, test_labels, size=100)
+print(f"validation acc: {val_acc}, validation loss: {val_loss}")
 
-    predicted_maxes = [torch.argmax(i) for i in batch_out]
-    actual_maxes = [torch.argmax(i) for i in batch_labels]
-    for predicted_class, real_class in zip(predicted_maxes, actual_maxes):
-        if predicted_class == real_class:
-            correct += 1
-        total += 1
-print("Accuracy: ", round(correct/total, 3))
+# correct = 0
+# total = 0
+# for i in tqdm(range(0, len(test_features), BATCH_SIZE)):
+#     batch_features = test_features[i:i+BATCH_SIZE].view(-1, 1, 50, 50).to(device)
+#     batch_labels = test_labels[i:i+BATCH_SIZE].to(device)
+#     batch_out = net(batch_features)
+#
+#     predicted_maxes = [torch.argmax(i) for i in batch_out]
+#     actual_maxes = [torch.argmax(i) for i in batch_labels]
+#     for predicted_class, real_class in zip(predicted_maxes, actual_maxes):
+#         if predicted_class == real_class:
+#             correct += 1
+#         total += 1
+# print("Accuracy: ", round(correct/total, 3))

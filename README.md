@@ -1,6 +1,13 @@
 ML-demos
 ===
 
+### Index
+```
+root : ML demos written via pure Python
+- pytrch : ML demos using PyTorch 1.5.x
+- tensrflow : ML demos using Tensorflow 2.x
+```
+
 ### GPU acceleration
 
 ```
